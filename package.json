@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "packageManager": "npm@10.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
