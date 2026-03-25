@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import "./index.css";
+// Removed the extra index.css import to prevent build loops
 
 // ============================================================
 // CONFIGURE YOUR OFFERS HERE
 // ============================================================
-const OFFERS: { title: string; description: string; imageUrl: string; url: string }[] = [
+const OFFERS = [
   {
     title: "Download & Play FreeCash",
     description: "Download + install the app",
@@ -35,7 +35,6 @@ const MIN_SECONDS = 30 * 60;
 const MAX_SECONDS = 30 * 60;
 const REQUIRED_OFFERS = 3;
 const STORAGE_KEY = "robux_offer_state";
-// ============================================================
 
 interface OfferState {
   clickedAt: number | null;
@@ -73,7 +72,6 @@ function saveState(state: OfferState[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-// ── Redeem Page ──────────────────────────────────────────────
 function RedeemPage({ onRedeem }: { onRedeem: (username: string) => void }) {
   const [code, setCode] = useState("");
   const [username, setUsername] = useState("");
@@ -90,7 +88,7 @@ function RedeemPage({ onRedeem }: { onRedeem: (username: string) => void }) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#080c18] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#080c18] relative overflow-hidden font-sans">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-blue-900/20 blur-[120px]" />
       </div>
@@ -138,32 +136,17 @@ function RedeemPage({ onRedeem }: { onRedeem: (username: string) => void }) {
             Redeem
           </button>
         </form>
-
-        <div className="flex items-center gap-5 mt-2">
-          <a
-            href="https://x.com/extvify"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-white transition-colors"
-            aria-label="X (Twitter)"
-          >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.631zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-          </a>
-        </div>
       </div>
     </div>
   );
 }
 
-// ── Processing / Offerwall Page ──────────────────────────────
 function ProcessingPage({ username }: { username: string }) {
   const [offerStates, setOfferStates] = useState<OfferState[]>(() =>
     loadState(OFFERS.length)
   );
   const [now, setNow] = useState(Date.now());
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timerRef = useRef<any>(null);
 
   useEffect(() => {
     timerRef.current = setInterval(() => {
@@ -185,25 +168,6 @@ function ProcessingPage({ username }: { username: string }) {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
-  useEffect(() => {
-    const onVisible = () => {
-      if (document.visibilityState === "visible") {
-        setOfferStates((prev) => {
-          const updated = prev.map((s) => {
-            if (!s.completed && s.clickedAt !== null && Date.now() - s.clickedAt >= s.requiredMs) {
-              return { ...s, completed: true };
-            }
-            return s;
-          });
-          saveState(updated);
-          return updated;
-        });
-      }
-    };
-    document.addEventListener("visibilitychange", onVisible);
-    return () => document.removeEventListener("visibilitychange", onVisible);
-  }, []);
-
   function handleStart(index: number) {
     const updated = offerStates.map((s, i) => {
       if (i === index && s.clickedAt === null && !s.completed) {
@@ -220,24 +184,24 @@ function ProcessingPage({ username }: { username: string }) {
   const progressPct = Math.min((completedCount / REQUIRED_OFFERS) * 100, 100);
 
   return (
-    <div className="min-h-screen bg-[#080c18] flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-[#080c18] flex items-center justify-center px-4 py-10 font-sans">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] rounded-full bg-purple-900/15 blur-[120px]" />
       </div>
 
-      <div className="offerwall-container relative z-10 w-full max-w-2xl bg-[#0f1220] border border-[#1e2240] rounded-2xl overflow-hidden shadow-2xl">
-        <div className="offerwall-header px-6 pt-7 pb-4 text-center border-b border-[#1e2240]">
+      <div className="relative z-10 w-full max-w-2xl bg-[#0f1220] border border-[#1e2240] rounded-2xl overflow-hidden shadow-2xl">
+        <div className="px-6 pt-7 pb-4 text-center border-b border-[#1e2240]">
           <h1 className="text-2xl font-bold text-white mb-2">🎉 You're Almost Done! 🎉</h1>
           <p className="text-gray-400 text-sm">
-            Your code is valid! Complete {REQUIRED_OFFERS} of our sponsor activities below to instantly receive{" "}
+            Your code is valid! Complete {REQUIRED_OFFERS} activities to receive{" "}
             <span className="text-white font-semibold">25,000 ROBUX!</span>
           </p>
         </div>
 
         <div className="px-6 py-4 border-b border-[#1e2240]">
-          <div className="progress-container w-full bg-[#1a1f35] rounded-full h-2 mb-2 overflow-hidden">
+          <div className="w-full bg-[#1a1f35] rounded-full h-2 mb-2 overflow-hidden">
             <div
-              className="progress-bar bg-green-500 h-2 rounded-full transition-all duration-700"
+              className="bg-green-500 h-2 rounded-full transition-all duration-700"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -246,7 +210,7 @@ function ProcessingPage({ username }: { username: string }) {
           </p>
         </div>
 
-        <div className="offer-list divide-y divide-[#1e2240]">
+        <div className="divide-y divide-[#1e2240]">
           {OFFERS.map((offer, i) => {
             const state = offerStates[i];
             const isCompleted = state?.completed ?? false;
@@ -265,42 +229,28 @@ function ProcessingPage({ username }: { username: string }) {
               : null;
 
             return (
-              <div key={i} className="offer-item px-6 py-4 hover:bg-[#131628] transition-colors">
+              <div key={i} className="px-6 py-4 hover:bg-[#131628] transition-colors">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#1a1f35] flex-shrink-0 flex items-center justify-center">
-                    {offer.imageUrl ? (
-                      <img src={offer.imageUrl} alt={offer.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-gray-600 text-xs text-center px-1">IMG</span>
-                    )}
+                    <img src={offer.imageUrl} alt="" className="w-8 h-8 object-contain" />
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <p className="offer-name text-white font-semibold text-sm leading-snug">{offer.title}</p>
-                    <p className="offer-description text-gray-400 text-xs mt-0.5">{offer.description}</p>
+                    <p className="text-white font-semibold text-sm leading-snug">{offer.title}</p>
+                    <p className="text-gray-400 text-xs mt-0.5">{offer.description}</p>
                   </div>
 
                   <div className="flex-shrink-0">
                     {isCompleted ? (
-                      <span className="flex items-center gap-1.5 text-green-400 font-semibold text-sm px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-lg">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                        Complete
+                      <span className="text-green-400 font-semibold text-sm px-4 py-2 bg-green-500/10 border border-green-500/30 rounded-lg">
+                        Done
                       </span>
-                    ) : isClicked ? (
-                      <button
-                        onClick={() => window.open(offer.url, "_blank", "noopener,noreferrer")}
-                        className="offer-button bg-yellow-500 hover:bg-yellow-400 text-black text-sm font-bold px-5 py-2 rounded-lg transition-colors"
-                      >
-                        Reopen
-                      </button>
                     ) : (
                       <button
-                        onClick={() => handleStart(i)}
-                        className="start-button bg-green-500 hover:bg-green-400 active:bg-green-600 text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors"
+                        onClick={() => isClicked ? window.open(offer.url, "_blank") : handleStart(i)}
+                        className={`text-white text-sm font-bold px-5 py-2 rounded-lg transition-colors ${isClicked ? 'bg-yellow-500' : 'bg-green-500'}`}
                       >
-                        Start
+                        {isClicked ? "Reopen" : "Start"}
                       </button>
                     )}
                   </div>
@@ -310,15 +260,9 @@ function ProcessingPage({ username }: { username: string }) {
                   <div className="mt-3 pl-[4.5rem]">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-gray-500">
-                        {isCompleted
-                          ? "Offer verified"
-                          : remaining !== null && remaining > 0
-                          ? `Verifying... ${formatTime(remaining)} remaining`
-                          : "Finalizing..."}
+                        {isCompleted ? "Verified" : `Waiting... ${formatTime(remaining || 0)}`}
                       </span>
-                      <span className={`text-xs font-semibold ${isCompleted ? "text-green-400" : "text-yellow-400"}`}>
-                        {Math.round(offerPct)}%
-                      </span>
+                      <span className="text-xs text-yellow-400 font-semibold">{Math.round(offerPct)}%</span>
                     </div>
                     <div className="w-full bg-[#1a1f35] rounded-full h-1.5 overflow-hidden">
                       <div
@@ -332,18 +276,11 @@ function ProcessingPage({ username }: { username: string }) {
             );
           })}
         </div>
-
-        <div className="px-6 py-4 text-center border-t border-[#1e2240]">
-          <p className="text-gray-600 text-xs">
-            Robux will be sent to <span className="text-gray-400">{username}</span> after completing {REQUIRED_OFFERS} offers.
-          </p>
-        </div>
       </div>
     </div>
   );
 }
 
-// ── Root App ─────────────────────────────────────────────────
 export default function App() {
   const [page, setPage] = useState<"redeem" | "processing">("redeem");
   const [username, setUsername] = useState("");
@@ -353,8 +290,5 @@ export default function App() {
     setPage("processing");
   }
 
-  if (page === "processing") {
-    return <ProcessingPage username={username} />;
-  }
-  return <RedeemPage onRedeem={handleRedeem} />;
+  return page === "processing" ? <ProcessingPage username={username} /> : <RedeemPage onRedeem={handleRedeem} />;
 }
